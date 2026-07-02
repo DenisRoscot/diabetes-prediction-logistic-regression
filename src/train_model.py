@@ -18,6 +18,13 @@ COLUMN_NAMES = [
     "Age",
     "Outcome",
 ]
+ZERO_AS_MISSING_COLUMNS = [
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+]
 
 
 def load_dataset():
@@ -42,6 +49,20 @@ def split_features_and_target(data):
     X = data.drop(columns="Outcome")
     y = data["Outcome"]
     return X, y
+
+
+def replace_zero_values(X_train, X_test):
+    """Replace impossible zero values with training-set median values."""
+    X_train_clean = X_train.copy()
+    X_test_clean = X_test.copy()
+
+    for column in ZERO_AS_MISSING_COLUMNS:
+        median_value = X_train_clean.loc[X_train_clean[column] != 0, column].median()
+
+        X_train_clean[column] = X_train_clean[column].replace(0, median_value)
+        X_test_clean[column] = X_test_clean[column].replace(0, median_value)
+
+    return X_train_clean, X_test_clean
 
 
 def scale_features(X_train, X_test):
@@ -82,6 +103,15 @@ def print_dataset_summary(data):
 
     print("\nTarget distribution:")
     print(data["Outcome"].value_counts().sort_index())
+
+
+def print_zero_value_summary(data):
+    """Print zero counts for columns where zero means missing clinical data."""
+    print("\nZero values treated as missing:")
+
+    for column in ZERO_AS_MISSING_COLUMNS:
+        zero_count = (data[column] == 0).sum()
+        print(f"{column}: {zero_count}")
 
 
 def print_evaluation(y_test, predictions):
@@ -128,14 +158,16 @@ def main():
         stratify=y,
     )
 
-    X_train_scaled, X_test_scaled, scaler = scale_features(X_train, X_test)
+    X_train_clean, X_test_clean = replace_zero_values(X_train, X_test)
+    X_train_scaled, X_test_scaled, scaler = scale_features(X_train_clean, X_test_clean)
     model = initialize_model()
     model = train_model(model, X_train_scaled, y_train)
     predictions = make_predictions(model, X_test_scaled)
 
     print_dataset_summary(data)
+    print_zero_value_summary(data)
     print_evaluation(y_test, predictions)
-    print_sample_inference(model, scaler, X_test)
+    print_sample_inference(model, scaler, X_test_clean)
 
 
 if __name__ == "__main__":
