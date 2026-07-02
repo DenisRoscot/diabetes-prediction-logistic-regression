@@ -21,11 +21,13 @@ COLUMN_NAMES = [
 
 
 def load_dataset():
+    """Load the diabetes dataset from the public CSV URL."""
     print("Loading dataset from URL.")
     return pd.read_csv(DATA_URL, names=COLUMN_NAMES)
 
 
 def validate_dataset(data):
+    """Check that the dataset contains the expected columns and rows."""
     missing_columns = set(COLUMN_NAMES) - set(data.columns)
 
     if missing_columns:
@@ -36,12 +38,14 @@ def validate_dataset(data):
 
 
 def split_features_and_target(data):
+    """Separate the input features X from the target variable y."""
     X = data.drop(columns="Outcome")
     y = data["Outcome"]
     return X, y
 
 
 def scale_features(X_train, X_test):
+    """Fit a scaler on the training features and transform train and test data."""
     scaler = StandardScaler()
 
     X_train_scaled = scaler.fit_transform(X_train)
@@ -51,23 +55,27 @@ def scale_features(X_train, X_test):
 
 
 def initialize_model():
+    """Create a Logistic Regression model with enough iterations to converge."""
     model = LogisticRegression(max_iter=1000, random_state=RANDOM_STATE)
     return model
 
 
 def train_model(model, X_train_scaled, y_train):
+    """Train the model using the scaled training data."""
     print("Training Logistic Regression model.")
     model.fit(X_train_scaled, y_train)
     return model
 
 
 def make_predictions(model, X_test_scaled):
+    """Use the trained model to predict labels for the scaled testing data."""
     print("Making predictions on the testing data.")
     predictions = model.predict(X_test_scaled)
     return predictions
 
 
 def print_dataset_summary(data):
+    """Print basic dataset size and class distribution information."""
     print("\nDataset shape:")
     print(f"Rows: {data.shape[0]}")
     print(f"Columns: {data.shape[1]}")
@@ -77,6 +85,7 @@ def print_dataset_summary(data):
 
 
 def print_evaluation(y_test, predictions):
+    """Print the accuracy score, confusion matrix, and classification report."""
     accuracy = accuracy_score(y_test, predictions)
     matrix = confusion_matrix(y_test, predictions)
 
@@ -91,6 +100,7 @@ def print_evaluation(y_test, predictions):
 
 
 def print_sample_inference(model, scaler, X_test):
+    """Print one example prediction with its diabetes risk probability."""
     patient = X_test.iloc[[0]]
     patient_scaled = scaler.transform(patient)
 
@@ -105,6 +115,7 @@ def print_sample_inference(model, scaler, X_test):
 
 
 def main():
+    """Run the full diabetes prediction training and evaluation pipeline."""
     data = load_dataset()
     validate_dataset(data)
     X, y = split_features_and_target(data)
