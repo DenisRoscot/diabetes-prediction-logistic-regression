@@ -34,11 +34,13 @@ def load_dataset():
 
 
 def validate_dataset(data):
+    """Check that the dataset contains the expected columns and rows using pandas Index operations."""
+    missing_columns = pd.Index(COLUMN_NAMES).difference(data.columns)
     """Check that the dataset contains the expected columns and rows."""
     missing_columns = set(COLUMN_NAMES) - set(data.columns)
 
-    if missing_columns:
-        raise ValueError(f"Missing required columns: {sorted(missing_columns)}")
+    if not missing_columns.empty:
+        raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     if data.empty:
         raise ValueError("Dataset is empty.")
