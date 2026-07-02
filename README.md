@@ -1,68 +1,69 @@
-# Diabetes Prediction with Logistic Regression
+# Patient Diabetes Risk Prediction Engine
 
-This project trains a logistic regression model to predict diabetes risk from tabular health data.
+Production-grade binary classification engine designed to predict diabetes risk in patients based on clinical diagnostic measurements. This repository contains the data processing pipeline, feature normalization, and localized inference modeling built on top of Scikit-Learn's Logistic Regression architecture.
 
-By default it uses scikit-learn's built-in diabetes dataset and converts the continuous disease progression score into a binary target:
+## Business & Technical Context
+Early intervention reduces patient health degradation. This micro-service accepts tabular clinical diagnostic vectors and yields a high-velocity risk probability score (\(0.0 \dots 1.0\)) to support clinical decision-making.
 
-- `0`: lower-risk progression
-- `1`: higher-risk progression
+### Clinical Feature Schema
+The system models inference vectors using the following verified medical data parameters:
+* `Pregnancies`: Total gestation cycles.
+* `Glucose`: Plasma glucose concentration (2-hour oral glucose tolerance test profile).
+* `BloodPressure`: Diastolic blood pressure metrics (mm Hg).
+* `SkinThickness`: Triceps skin fold thickness matrix (mm).
+* `Insulin`: 2-Hour serum insulin concentrations (mu U/ml).
+* `BMI`: Body Mass Index profile (\(kg/m^2\)).
+* `DiabetesPedigreeFunction`: Computed genetic diabetes history coefficient.
+* `Age`: Structural age bracket.
+* **Target (`Outcome`)**: Boolean indicator (`0` = Control/Healthy, `1` = Positive Diagnosis).
 
-You can also train it with a CSV dataset such as the Pima Indians Diabetes dataset. If the CSV has an `Outcome` column, that column is used as the target. Otherwise, the last column is used.
+---
 
-## Project Structure
+## Technical Pipeline Architecture
 
+### Data Pipeline & Preprocessing
+* **Ingestion Layer**: Robust decoupled tabular intake pipelines powered by `pandas`.
+* **Data Splitting**: Stratified data splitting protocol (\(75\%\) Train / \(25\%\) Holdout Evaluation) ensuring structural validation balances.
+* **Feature Scaling**: Robust feature normalization using a fitted `StandardScaler` pipeline to eliminate scaling bias across heterogeneous medical metrics.
+
+### Modeling Stack
+* **Algorithm**: Optimized `Logistic Regression` classifier.
+* **Convergence Parameters**: Maximum iteration constraints scaled to `1000` steps to safely achieve mathematical convergence under dense data footprints.
+* **Reproducibility**: Complete pseudo-random seed lockdown to isolate and stabilize model weights across training runs.
+
+---
+
+## Repository Structure
 ```text
-.
-├── main.py            # CLI for training and prediction
-├── pyproject.toml     # Python dependencies and script config
-├── uv.lock            # uv lock file
-└── README.md
+diabetes-prediction-logistic-regression/
+│
+├── src/                   # Production Core Source Engine
+│   └── train_model.py     # End-to-end model pipeline execution module
+├── .gitignore             # Local development runtime exclusion filters
+├── README.md              # System Architecture & Documentation
+└── requirements.txt       # Production dependency configuration manifest
 ```
 
-Generated files are written to `artifacts/` and are ignored by Git.
+## System Deployment & Execution Guide
 
-## Setup
-
+### 1. Environment Initialization
+Isolate your localized dependencies using a Python virtual environment manager:
 ```bash
-uv sync
+python -m venv .venv
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-## Train the Model
-
-Train with the built-in demo dataset:
-
+### 2. Running Pipeline Inferences
+To execute the end-to-end extraction, normalization, training, and evaluation runtime layer, trigger the production module:
 ```bash
-uv run python3 main.py
+python src/train_model.py
 ```
 
-Train with your own CSV:
+The dataset is loaded directly from a public CSV URL, so no local `data/` directory is required.
 
-```bash
-uv run python3 main.py --data data/diabetes.csv
-```
-
-The script saves:
-
-- `artifacts/diabetes_logistic_regression.joblib`
-- `artifacts/metrics.json`
-
-## Make a Prediction
-
-After training, pass feature values in the same order as the training columns:
-
-```bash
-uv run python3 main.py --predict 0.038 0.051 0.062 0.022 -0.044 -0.035 -0.043 -0.002 0.020 -0.018
-```
-
-## Model
-
-The training pipeline uses:
-
-- `StandardScaler`
-- `LogisticRegression`
-- `train_test_split` with stratification
-- accuracy, confusion matrix, and classification report metrics
-
-## Notes
-
-The built-in dataset is useful for demonstrating the machine learning workflow locally. For a real medical prediction project, use a clinically appropriate dataset, validate data quality carefully, and do not treat this model as medical advice.
+### 3. Core Validation Metrics (Baseline Model)
+The pipeline prints the following validation metrics:
+* **Accuracy Score**: Holdout-set classification accuracy.
+* **Inference Logging**: Outputs a comprehensive classification tracking matrix (Precision, Recall, F1) alongside a raw Confusion Matrix for true/false positive isolation.

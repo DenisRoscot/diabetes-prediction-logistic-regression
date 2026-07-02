@@ -7,8 +7,10 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
+venv/
+env/
+.env/
 
 # Generated project artifacts
 artifacts/
-data/*.csv
