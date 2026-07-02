@@ -40,25 +40,22 @@ diabetes-prediction-logistic-regression/
 ├── src/                   # Production Core Source Engine
 │   └── train_model.py     # End-to-end model pipeline execution module
 ├── .gitignore             # Local development runtime exclusion filters
-├── README.md              # System Architecture & Documentation
-└── requirements.txt       # Production dependency configuration manifest
+├── pyproject.toml         # Project metadata and dependency configuration
+└── README.md              # System Architecture & Documentation
 ```
 
 ## System Deployment & Execution Guide
 
 ### 1. Environment Initialization
-Isolate your localized dependencies using a Python virtual environment manager:
+Install the project dependencies with `uv`:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
-pip install --upgrade pip
-pip install -r requirements.txt
+uv sync
 ```
 
 ### 2. Running Pipeline Inferences
 To execute the end-to-end extraction, normalization, training, and evaluation runtime layer, trigger the production module:
 ```bash
-python src/train_model.py
+uv run python src/train_model.py
 ```
 
 The dataset is loaded directly from a public CSV URL, so no local `data/` directory is required.
